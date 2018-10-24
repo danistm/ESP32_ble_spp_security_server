@@ -131,10 +131,6 @@ static const uint16_t character_client_config_uuid = ESP_GATT_UUID_CHAR_CLIENT_C
 static const uint8_t char_prop_read_notify = ESP_GATT_CHAR_PROP_BIT_READ|ESP_GATT_CHAR_PROP_BIT_NOTIFY;
 static const uint8_t char_prop_read_write = ESP_GATT_CHAR_PROP_BIT_WRITE_NR|ESP_GATT_CHAR_PROP_BIT_READ;
 
-#ifdef SUPPORT_HEARTBEAT
-static const uint8_t char_prop_read_write_notify = ESP_GATT_CHAR_PROP_BIT_READ|ESP_GATT_CHAR_PROP_BIT_WRITE_NR|ESP_GATT_CHAR_PROP_BIT_NOTIFY;
-#endif
-
 ///SPP Service - data receive characteristic, read&write without response
 static const uint16_t spp_data_receive_uuid = ESP_GATT_UUID_SPP_DATA_RECEIVE;
 static const uint8_t  spp_data_receive_val[20] = {0x00};
@@ -273,7 +269,7 @@ static void print_write_buffer(void)
     temp_spp_recv_data_node_p1 = SppRecvDataBuff.first_node;
 
     while(temp_spp_recv_data_node_p1 != NULL){
-        uart_write_bytes(UART_NUM_0, (char *)(temp_spp_recv_data_node_p1->node_buff), temp_spp_recv_data_node_p1->len);
+        uart_write_bytes(UART_NUM_2, (char *)(temp_spp_recv_data_node_p1->node_buff), temp_spp_recv_data_node_p1->len);
         temp_spp_recv_data_node_p1 = temp_spp_recv_data_node_p1->next_node;
     }
 }
@@ -304,7 +300,7 @@ void uart_task(void *pvParameters)
                         break;
                     }
                     memset(temp,0x0,event.size);
-                    uart_read_bytes(UART_NUM_0,temp,event.size,portMAX_DELAY);
+                    uart_read_bytes(UART_NUM_2, temp,event.size, portMAX_DELAY);
                     if(event.size <= (spp_mtu_size - 3)){
                         esp_ble_gatts_send_indicate(spp_gatts_if, spp_conn_id, spp_handle_table[SPP_IDX_SPP_DATA_NTY_VAL],event.size, temp, false);
                     }else if(event.size > (spp_mtu_size - 3)){
@@ -363,11 +359,11 @@ static void spp_uart_init(void)
     };
 
     //Set UART parameters
-    uart_param_config(UART_NUM_0, &uart_config);
+    uart_param_config(UART_NUM_2, &uart_config);
     //Set UART pins
-    uart_set_pin(UART_NUM_0, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+    uart_set_pin(UART_NUM_2, GPIO_NUM_17, GPIO_NUM_16, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
     //Install UART driver, and get the queue.
-    uart_driver_install(UART_NUM_0, 4096, 8192, 10,&spp_uart_queue,0);
+    uart_driver_install(UART_NUM_2, 4096, 8192, 10,&spp_uart_queue,0);
     xTaskCreate(uart_task, "uTask", 2048, (void*)UART_NUM_0, 8, NULL);
 }
 
@@ -548,7 +544,7 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
 #ifdef SPP_DEBUG_MODE
                     esp_log_buffer_char(GATTS_TABLE_TAG,(char *)(p_data->write.value),p_data->write.len);
 #else
-                    uart_write_bytes(UART_NUM_0, (char *)(p_data->write.value), p_data->write.len);
+                    uart_write_bytes(UART_NUM_2, (char *)(p_data->write.value), p_data->write.len);
 #endif
                 }else{
                     //TODO:
