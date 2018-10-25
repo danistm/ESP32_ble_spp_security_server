@@ -27,7 +27,7 @@
 #include "esp_gatts_api.h"
 #include "esp_bt_defs.h"
 #include "esp_bt_main.h"
-#include "ble_spp_server_demo.h"
+#include "ble_spp_sec_server.h"
 
 #define GATTS_TABLE_TAG  "GATTS_SPP_DEMO"
 
