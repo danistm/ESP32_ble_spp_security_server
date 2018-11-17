@@ -593,14 +593,14 @@ static void gatts_profile_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_
     	    spp_conn_id = p_data->connect.conn_id;
     	    spp_gatts_if = gatts_if;
     	    is_connected = true;
-            gpio_set_level(GPIO_NUM_2, 1);
+            gpio_set_level(GPIO_NUM_5, 1);
     	    memcpy(&spp_remote_bda,&p_data->connect.remote_bda,sizeof(esp_bd_addr_t));
             //esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT);
         	break;
     	case ESP_GATTS_DISCONNECT_EVT:
     	    is_connected = false;
     	    enable_data_ntf = false;
-            gpio_set_level(GPIO_NUM_2, 0);
+            gpio_set_level(GPIO_NUM_5, 0);
     	    esp_ble_gap_start_advertising(&spp_adv_params);
     	    break;
     	case ESP_GATTS_OPEN_EVT:
@@ -665,8 +665,8 @@ void app_main()
     esp_err_t ret;
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
 
-    gpio_set_direction(GPIO_NUM_2, GPIO_MODE_OUTPUT);
-    gpio_set_level(GPIO_NUM_2, 0);
+    gpio_set_direction(GPIO_NUM_5, GPIO_MODE_OUTPUT);
+    gpio_set_level(GPIO_NUM_5, 0);
 
     // Initialize NVS
     ret = nvs_flash_init();
